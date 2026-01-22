@@ -1,0 +1,7 @@
+# Ignore build files
+target/
+*.class
+*.log
+
+# Ignore secrets
+src/main/resources/application.properties
