@@ -52,23 +52,55 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+
+                        // ✅ Public endpoints
                         .requestMatchers("/auth/**", "/oauth2/**").permitAll()
-                        // Protected endpoints
+
+                        // ✅ EMPLOYEE attendance APIs
+                        .requestMatchers(
+                                "/api/attendance/check-in",
+                                "/api/attendance/check-out",
+                                "/api/attendance/today",
+                                "/api/attendance/me",
+                                "/api/help//employee",
+                                "/api/help/employee/**"
+                        ).hasRole("EMPLOYEE")
+
+                        // ✅ ADMIN attendance APIs
+                        .requestMatchers(
+                                "/api/attendance/user/**",
+                                "/api/attendance/date/**",
+                                "/api/help/admin",
+                                "/api/help/admin/**"
+                        ).hasRole("ADMIN")
+
+                        // ✅ Other EMPLOYEE APIs
                         .requestMatchers("/api/user/**").hasRole("EMPLOYEE")
+
+                        // ❌ Everything else requires authentication
                         .anyRequest().authenticated()
                 )
-                // Enable OAuth2 login
+
+                // OAuth2 Login
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(user -> user.userService(customOAuth2UserService))
                         .successHandler(oAuth2LoginSuccessHandler)
                 )
-                // Stateless session for JWT
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // JWT Stateless session
+                .sessionManagement(sess ->
+                        sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
                 // JWT filter
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(
+                        jwtAuthenticationFilter(),
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }
+
 }
