@@ -24,9 +24,14 @@ public class Vehicle {
     private String ownerName;
     private String phone;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     public Vehicle() {}
 
     // Getters & Setters
+
     public Long getId() { return id; }
 
     public String getPlateNumber() { return plateNumber; }
@@ -52,4 +57,7 @@ public class Vehicle {
 
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 }
